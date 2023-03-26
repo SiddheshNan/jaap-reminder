@@ -15,6 +15,7 @@ import { getMantras, setMantras, showAlert } from "../utils";
 const Mantras = ({ route, navigation }) => {
   const focus = useIsFocused();
 
+  const scrollRef = React.useRef(null);
   const [modal, setModal] = React.useState({
     visible: false,
     name: "",
@@ -25,6 +26,11 @@ const Mantras = ({ route, navigation }) => {
 
   React.useEffect(() => {
     if (focus) {
+      scrollRef?.current?.scrollTo({
+        y: 0,
+        animated: true,
+      });
+
       getMantras().then((data) => {
         setItems(data);
       });
@@ -120,7 +126,7 @@ const Mantras = ({ route, navigation }) => {
 
       <SafeAreaView style={{ flex: 1, paddingTop: -35 }}>
         <KeyboardAvoidingView style={{ flex: 1 }}>
-          <ScrollView>
+          <ScrollView ref={scrollRef}>
             <View style={{ flex: 1, height: "100%" }}>
               <Card
                 containerStyle={{
@@ -146,6 +152,7 @@ const Mantras = ({ route, navigation }) => {
                     backgroundColor: "#27AE60",
                     borderRadius: 5,
                     marginTop: 10,
+                    marginBottom: 5,
                   }}
                   onPress={() => setModal({ visible: true })}
                 >
@@ -158,42 +165,67 @@ const Mantras = ({ route, navigation }) => {
                     flexWrap: "wrap",
                     justifyContent: "center",
                     alignItems: "center",
-                    width: "100%",
+                    alignSelf: "center",
+                    alignContent: "center",
+                    width: "95%",
                     marginTop: 10,
                   }}
                 >
                   {items.map((item, index) => (
-                    <View key={index}>
+                    <View key={index} style={{ width: "100%", marginTop: 12 }}>
                       <View
                         style={{
-                          borderBottomColor: "gray",
-                          borderBottomWidth: 1,
-                          marginBottom: 5,
-                          marginTop: 15,
+                          width: "100%",
+                          flexDirection: "row",
+                          marginTop: 5,
+                          paddingVertical: 12,
+                          paddingHorizontal: 18,
+                          borderWidth: 1,
+                          borderRadius: 10,
+                          borderColor: "#FFB200",
                         }}
-                      />
-                      <View style={{ flexDirection: "row", marginTop: 15 }}>
-                        <Text
+                      >
+                        <View
                           style={{
-                            fontWeight: "bold",
-                            marginTop: 4,
-                            fontSize: 20,
+                            width: "100%",
+                            flexDirection: "row",
+                            justifyContent: "space-between",
                           }}
                         >
-                          {item.name} ({item.num})
-                        </Text>
-                        <Button
-                          title="डिलीट करा"
-                          buttonStyle={{
-                            marginLeft: 10,
-                            borderRadius: 5,
-                            backgroundColor: "#E74C3C",
-                          }}
-                          onPress={() => deleteMantra(index)}
-                        />
+                          <Text
+                            style={{
+                              fontWeight: "bold",
+                              marginTop: 4,
+                              fontSize: 20,
+                            }}
+                          >
+                            {item.name} ({item.num})
+                          </Text>
+                          <Button
+                            title="डिलीट करा"
+                            buttonStyle={{
+                              marginLeft: 10,
+                              borderRadius: 5,
+                              backgroundColor: "#E74C3C",
+                            }}
+                            onPress={() => deleteMantra(index)}
+                          />
+                        </View>
                       </View>
                     </View>
                   ))}
+                  {items.length === 0 && (
+                    <Text
+                      style={{
+                        textAlign: "center",
+                        fontSize: 20,
+                        color: "#28B463",
+                        marginTop: 20,
+                      }}
+                    >
+                      कोणतेही मंत्र नाही,{"\n"}कृपया नवीन मंत्र ऍड करा
+                    </Text>
+                  )}
                 </View>
               </Card>
             </View>

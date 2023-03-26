@@ -29,42 +29,33 @@ import {
   getList,
   saveList,
   showAlert,
+  getInitialState,
 } from "../utils";
-
-const getInitialState = () => {
-  return {
-    name: "",
-    gotra: "",
-
-    chantName: "",
-    chantSankhya: 0,
-
-    startDate: getTodayDateString(),
-    endDate: addDateToExistingDateString(getTodayDateString(), 30),
-
-    additional_text: "",
-    cost_text: "",
-  };
-};
 
 const HomePage = ({ route, navigation }) => {
   const focus = useIsFocused();
 
+  const scrollRef = React.useRef(null);
   const [state, setState] = React.useState(getInitialState());
-
   const [mantras, setMantras] = React.useState([]);
-
-  const [times, setTimes] = React.useState(1);
 
   React.useEffect(() => {
     if (focus) {
+
+      scrollRef?.current?.scrollTo({
+        y: 0,
+        animated: true,
+      });
+
       getMantras().then((mantra) => {
         setMantras(mantra);
-        setState({
-          ...state,
-          chantName: mantra[0].name,
-          chantSankhya: mantra[0].num,
-        });
+        if (typeof mantra[0] !== "undefined") {
+          setState({
+            ...state,
+            chantName: mantra[0].name,
+            chantSankhya: mantra[0].num,
+          });
+        }
       });
     } else {
       setState(getInitialState());
@@ -73,6 +64,14 @@ const HomePage = ({ route, navigation }) => {
 
   const onSubmit = async () => {
     try {
+      if (
+        !state.name ||
+        !state.gotra ||
+        !state.chantName ||
+        !state.chantSankhya
+      ) {
+        return showAlert("सूचना ", "कृपया संपूर्ण माहिती टाका");
+      }
       const allItems = [...(await getList())];
       allItems.push({ ...state });
       saveList(allItems);
@@ -100,20 +99,11 @@ const HomePage = ({ route, navigation }) => {
             marginBottom: 5,
           },
         }}
-        // leftComponent={{
-        //   icon: "arrow-back",
-        //   color: "#fff",
-        //   style: {
-        //     marginTop: 12,
-        //     marginLeft: 15,
-        //   },
-        //   onPress: () => navigation.goBack(),
-        // }}
       />
 
       <SafeAreaView style={{ flex: 1, paddingTop: -35 }}>
         <KeyboardAvoidingView style={{ flex: 1 }}>
-          <ScrollView>
+          <ScrollView ref={scrollRef}>
             <View style={{ flex: 1, height: "100%" }}>
               <Card
                 containerStyle={{
@@ -130,7 +120,7 @@ const HomePage = ({ route, navigation }) => {
                     fontWeight: "bold",
                   }}
                 >
-                  नवीन माहिती टाका
+                  नवीन ऍड करा
                 </Text>
                 <Input
                   placeholder="पूर्ण नाव"
@@ -153,31 +143,31 @@ const HomePage = ({ route, navigation }) => {
                   <View key={index}>
                     <CheckBox
                       size={28}
-                      title={`${mantra.name} (${mantra.num * times})`}
+                      title={`${mantra.name} (${mantra.num * state.times})`}
                       checked={state.chantName === mantra.name}
                       onPress={() => {
                         setState({
                           ...state,
                           chantName: mantra.name,
-                          chantSankhya: mantra.num * times,
+                          chantSankhya: mantra.num,
                         });
                       }}
+                      textStyle={{ fontSize: 16 }}
                     />
                   </View>
                 ))}
 
                 <ButtonGroup
                   buttons={["1 पट", "2 पट", "3 पट", "4 पट"]}
-                  selectedIndex={times - 1}
+                  selectedIndex={state.times - 1}
                   onPress={(e) => {
-                    setTimes(e + 1);
                     setState({
                       ...state,
+                      times: e + 1,
                       chantSankhya:
                         mantras.find(
                           (mantra) => mantra.name === state.chantName
-                        ).num *
-                        (e + 1),
+                        )?.num ?? 0,
                     });
                   }}
                   containerStyle={{ height: 50 }}
@@ -268,10 +258,12 @@ const HomePage = ({ route, navigation }) => {
                   style={{
                     fontWeight: "bold",
                     textAlign: "center",
-                    fontSize: 22,
+                    fontSize: 21,
                     lineHeight: 35,
                   }}
                 >
+                  संपूर्ण जप : {state.chantSankhya * state.times}
+                  {"\n"}
                   लागणारे दिवस :{" "}
                   {datediff(
                     getDateFromDateString(state.startDate),
@@ -280,7 +272,7 @@ const HomePage = ({ route, navigation }) => {
                   {"\n"}
                   रोजची जप संख्या :{" "}
                   {Math.ceil(
-                    state.chantSankhya /
+                    (state.chantSankhya * state.times) /
                       datediff(
                         getDateFromDateString(state.startDate),
                         getDateFromDateString(state.endDate)

@@ -1,6 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
-export const APP_NAME = "Jaap Reminder";
 
 const planets_default = [
   {
@@ -118,4 +117,55 @@ export const saveList = async (js_object) => {
   } catch (e) {
     showAlert("Error", `${e.name} - ${e.message}}`);
   }
+};
+
+export const getJapCount = (japSankhya, startDate, endDate) => {
+  const days = datediff(
+    getDateFromDateString(startDate),
+    getDateFromDateString(endDate)
+  );
+  return Math.ceil(japSankhya / days);
+};
+
+export const checkBetweenTwoDates = (
+  startDateString,
+  endDateString,
+  todayDate
+) => {
+  const d1 = startDateString.split("/");
+  const d2 = endDateString.split("/");
+
+  const date_parts = todayDate.split("/");
+
+  const from = new Date(d1[2], parseInt(d1[1]) - 1, d1[0]); // -1 because months are from 0 to 11
+  const to = new Date(d2[2], parseInt(d2[1]) - 1, d2[0]);
+
+  const date = new Date(
+    date_parts[2],
+    parseInt(date_parts[1]) - 1,
+    date_parts[0]
+  );
+
+  if (date >= from && date < to) {
+    return true;
+  }
+
+  return false;
+};
+
+export const getInitialState = () => {
+  return {
+    name: "",
+    gotra: "",
+
+    chantName: "",
+    chantSankhya: 0,
+    times: 1,
+
+    startDate: getTodayDateString(),
+    endDate: addDateToExistingDateString(getTodayDateString(), 30),
+
+    additional_text: "",
+    cost_text: "",
+  };
 };

@@ -1,27 +1,46 @@
 import React from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  KeyboardAvoidingView,
-} from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { SearchBar, Card, Header, ButtonGroup } from "@rneui/themed";
+import { Card, Header } from "@rneui/themed";
 import { useIsFocused } from "@react-navigation/native";
 import Constants from "expo-constants";
-import { getList } from "../utils";
+import {
+  datediff,
+  getJapCount,
+  getList,
+  getDateFromDateString,
+  getTodayDateString,
+  checkBetweenTwoDates,
+} from "../utils";
 
 // show only current jap (in running)
 const HomePage = ({ route, navigation }) => {
   const focus = useIsFocused();
+  const scrollRef = React.useRef(null);
 
   const [items, setItems] = React.useState([]);
 
   React.useEffect(() => {
     if (focus) {
-      getList().then((data) => {
-        setItems(data);
+      scrollRef?.current?.scrollTo({
+        y: 0,
+        animated: true,
+      });
+
+      getList().then((allItems) => {
+        const loc_items = [];
+
+        const todayDate = getTodayDateString();
+
+        for (let myItem of allItems) {
+          if (
+            checkBetweenTwoDates(myItem.startDate, myItem.endDate, todayDate)
+          ) {
+            loc_items.push(myItem);
+          }
+        }
+        setItems(loc_items);
+        // setItems(data);
       });
     }
   }, [focus]);
@@ -44,21 +63,82 @@ const HomePage = ({ route, navigation }) => {
       />
 
       <SafeAreaView style={{ flex: 1, paddingTop: -35 }}>
-        <ScrollView>
-          <View style={{ flex: 1, height: "100%", marginTop: 15 }}>
-            <Card containerStyle={{ padding: 20, borderRadius: 15 }}>
-              <View
+        <ScrollView ref={scrollRef}>
+          <View style={{ flex: 1, height: "100%", marginBottom: 30 }}>
+            <Card
+              containerStyle={{
+                paddingVertical: 25,
+                paddingHorizontal: 23,
+                borderRadius: 15,
+              }}
+            >
+              <Text
                 style={{
-                  flexDirection: "row",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  width: "100%",
-                  marginTop: 10,
+                  textAlign: "center",
+                  marginBottom: 25,
+                  fontSize: 25,
+                  fontWeight: "bold",
                 }}
               >
-                <Text>{JSON.stringify(items)}</Text>
-                {/* <Button
+                आजचे जप
+              </Text>
+
+              {items.map((item, index) => (
+                <View
+                  key={index}
+                  style={{
+                    borderWidth: 1,
+                    borderRadius: 10,
+                    marginBottom: 20,
+                    paddingVertical: 12,
+                    paddingHorizontal: 25,
+                    borderColor: "#FFB200",
+                  }}
+                >
+                  <Text style={{ fontSize: 18, lineHeight: 26 }}>
+                    नाव : {item.name}
+                    {"\n"}
+                    गोत्र : {item.gotra}
+                    {"\n"}
+                    मंत्र : {item.chantName}
+                    {"\n"}
+                    तारखा : {item.startDate} - {item.endDate}
+                    {"\n"}(
+                    {datediff(
+                      getDateFromDateString(item.startDate),
+                      getDateFromDateString(item.endDate)
+                    )}{" "}
+                    दिवस)
+                  </Text>
+
+                  <Text
+                    style={{ fontSize: 20, marginTop: 7.5, fontWeight: "bold" }}
+                  >
+                    आजची जप संख्या :{" "}
+                    {getJapCount(
+                      item.chantSankhya * item.times,
+                      item.startDate,
+                      item.endDate
+                    )}
+                    {"\n"}
+                    एकूण जप संख्या : {item.chantSankhya * item.times}
+                  </Text>
+                </View>
+              ))}
+
+              {items.length === 0 && (
+                <Text
+                  style={{
+                    textAlign: "center",
+                    fontSize: 20,
+                    color: "#28B463",
+                  }}
+                >
+                  आज कोणताही जप नाही !
+                </Text>
+              )}
+
+              {/* <Button
                   title={"User Login"}
                   size="lg"
                   titleStyle={styles.btnText}
@@ -68,7 +148,7 @@ const HomePage = ({ route, navigation }) => {
                     navigation.navigate("UserLogin");
                   }}
                 /> */}
-                {/* <Button
+              {/* <Button
                   title={"User Signup"}
                   size="lg"
                   titleStyle={styles.btnText}
@@ -78,7 +158,6 @@ const HomePage = ({ route, navigation }) => {
                     navigation.navigate("UserRegister");
                   }}
                 /> */}
-              </View>
             </Card>
           </View>
         </ScrollView>
