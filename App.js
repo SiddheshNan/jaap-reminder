@@ -1,20 +1,74 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { ThemeProvider } from "@rneui/themed";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { Ionicons, Entypo } from "@expo/vector-icons";
+import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
+
+import HomePage from "./screens/HomePage";
+import AddNew from "./screens/AddNew";
+import Mantras from "./screens/Mantras";
+
+const Tab = createMaterialBottomTabNavigator();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <ThemeProvider>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <Tab.Navigator
+            screenOptions={{ headerShown: false }}
+            initialRouteName="HomePage"
+            barStyle={{ backgroundColor: "#FFD966", height: 75, paddingTop: 0 }}
+
+           
+          >
+            <Tab.Screen
+              name="HomePage"
+              component={HomePage}
+              options={{
+                tabBarLabel: "मुख्यपृष्ठ",
+                tabBarIcon: () => <Ionicons name="home" size={20} />,
+              }}
+            />
+            <Tab.Screen
+              name="Mantras"
+              component={Mantras}
+              options={{
+                tabBarLabel: "मंत्रे ",
+                tabBarIcon: () => <Entypo name="text-document" size={20} />,
+              }}
+            />
+
+            <Tab.Screen
+              name="AddNew"
+              component={AddNew}
+              options={{
+                tabBarLabel: "नवीन",
+                tabBarIcon: () => <Entypo name="add-to-list" size={20} />,
+              }}
+            />
+          </Tab.Navigator>
+
+          {/* <Stack.Navigator
+            screenOptions={{ headerShown: false }}
+            initialRouteName="HomePage"
+          >
+            <Stack.Screen
+              name="HomePage"
+              component={HomePage}
+              options={{ animation: "default" }}
+            />
+
+            <Stack.Screen
+              name="AddNew"
+              component={AddNew}
+              options={{ animation: "default" }}
+            />
+
+          </Stack.Navigator> */}
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </ThemeProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
