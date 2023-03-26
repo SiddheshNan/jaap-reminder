@@ -22,6 +22,7 @@ import { useIsFocused } from "@react-navigation/native";
 import Constants from "expo-constants";
 import {
   getMantras,
+  getJapCount,
   getTodayDateString,
   getDateFromDateString,
   getStringFromDate,
@@ -31,7 +32,12 @@ import {
   saveList,
   showAlert,
   getInitialState,
+  setMantras,
 } from "../utils";
+import * as DocumentPicker from "expo-document-picker";
+
+import * as FileSystem from "expo-file-system";
+import { StorageAccessFramework } from "expo-file-system";
 
 const Stack = createNativeStackNavigator();
 
@@ -74,6 +80,81 @@ const ItemList = ({ route, navigation }) => {
         },
       },
     ]);
+  };
+  const fileName = "jaap-reminder.json";
+
+  const doBackup = async () => {
+    try {
+      const permissions =
+        await StorageAccessFramework.requestDirectoryPermissionsAsync();
+      if (!permissions.granted) {
+        return showAlert("सूचना ", "कृपया परवानगी द्या");
+      }
+
+      const filesInFolder = await StorageAccessFramework.readDirectoryAsync(
+        permissions.directoryUri
+      );
+
+      if (!filesInFolder.length) {
+        //create file
+        await StorageAccessFramework.createFileAsync(
+          permissions.directoryUri,
+          fileName,
+          "application/json"
+        );
+      }
+
+      const filesInRoot = await StorageAccessFramework.readDirectoryAsync(
+        permissions.directoryUri
+      );
+
+      const fileData = {};
+      fileData["mantras"] = await getMantras();
+      fileData["lists"] = await getList();
+
+      await FileSystem.writeAsStringAsync(
+        filesInRoot[0],
+        JSON.stringify(fileData),
+        {
+          encoding: "utf8",
+        }
+      );
+
+      return showAlert("सूचना ", "बॅकअप यशस्वी!");
+    } catch (error) {
+      showAlert("Error", `${error.name} - ${error.message}`);
+    }
+  };
+
+  const doRestore = async () => {
+    try {
+      const permission =
+        await StorageAccessFramework.requestDirectoryPermissionsAsync();
+      if (!permission.granted) {
+        return showAlert("सूचना ", "कृपया परवानगी द्या");
+      }
+
+      const filesInRoot = await StorageAccessFramework.readDirectoryAsync(
+        permission.directoryUri
+      );
+
+      if (!filesInRoot.length) {
+        return showAlert("Error", "No file found");
+      }
+
+      const fileContents = await StorageAccessFramework.readAsStringAsync(
+        filesInRoot[0]
+      );
+
+      const fileData = JSON.parse(fileContents);
+
+      await saveList(fileData.lists);
+      await setMantras(fileData.mantras);
+
+      return showAlert("सूचना ", "रिस्टोर यशस्वी!");
+    } catch (error) {
+      showAlert("Error", `${error.name} - ${error.message}`);
+    }
   };
 
   return (
@@ -132,15 +213,37 @@ const ItemList = ({ route, navigation }) => {
                       {"\n"}
                       गोत्र : {item.gotra}
                       {"\n"}
-                      मंत्र : {item.chantName} (संपूर्ण संख्या :{" "}
-                      {item.chantSankhya * item.times}){"\n"}
+                      मंत्र : {item.chantName} ({item.chantSankhya}) (
+                      {item.times} पट)
+                      {"\n"}
+                      एकूण संख्या : {item.chantSankhya * item.times}
+                      {"\n"}
                       तारखा : {item.startDate} - {item.endDate}
-                      {"\n"}(
+                      {"\n"}
+                      दिवस :{" "}
                       {datediff(
                         getDateFromDateString(item.startDate),
                         getDateFromDateString(item.endDate)
-                      )}{" "}
-                      दिवस)
+                      )}
+                      {"\n"}
+                      एक दिवसाचा जप :{" "}
+                      {getJapCount(
+                        item.chantSankhya * item.times,
+                        item.startDate,
+                        item.endDate
+                      )}
+                      {item.additional_text && (
+                        <>
+                          {"\n"}
+                          अतिरिक्त माहिती : {item.additional_text}
+                        </>
+                      )}
+                      {item.cost_text && (
+                        <>
+                          {"\n"}
+                          हिशोब : {item.cost_text}
+                        </>
+                      )}
                     </Text>
                     <Button
                       size="sm"
@@ -170,7 +273,7 @@ const ItemList = ({ route, navigation }) => {
                   </View>
                 ))}
 
-                {items.length === 0 && (
+                {items.length === 0 ? (
                   <Text
                     style={{
                       textAlign: "center",
@@ -178,8 +281,35 @@ const ItemList = ({ route, navigation }) => {
                       color: "#28B463",
                     }}
                   >
-                    यादी रिकामी आहे,{"\n"} कृपया नवीन माहिती ऍड करा
+                    यादी रिकामी आहे,{"\n"} कृपया नवीन माहिती संपादित करा
                   </Text>
+                ) : (
+                  <View>
+                    <Button
+                      size="sm"
+                      titleStyle={{ fontWeight: "bold", fontSize: 20 }}
+                      buttonStyle={{
+                        borderRadius: 5,
+                        marginTop: 10,
+                      }}
+                      onPress={doBackup}
+                    >
+                      बॅकअप घ्या
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      titleStyle={{ fontWeight: "bold", fontSize: 20 }}
+                      buttonStyle={{
+                        // backgroundColor: "#E74C3C",
+                        borderRadius: 5,
+                        marginTop: 10,
+                      }}
+                      onPress={doRestore}
+                    >
+                      रिस्टोर करा
+                    </Button>
+                  </View>
                 )}
               </Card>
             </View>
@@ -271,7 +401,7 @@ const EditScreen = ({ route, navigation }) => {
                     fontWeight: "bold",
                   }}
                 >
-                  माहिती एडिट करा
+                  माहिती संपादित करा
                 </Text>
                 <Input
                   placeholder="पूर्ण नाव"
@@ -315,9 +445,6 @@ const EditScreen = ({ route, navigation }) => {
                     setState({
                       ...state,
                       times: e + 1,
-                      chantSankhya: mantras.find(
-                        (mantra) => mantra.name === state.chantName
-                      ).num,
                     });
                   }}
                   containerStyle={{ height: 50 }}

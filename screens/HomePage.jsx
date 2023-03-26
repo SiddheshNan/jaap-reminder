@@ -100,15 +100,16 @@ const HomePage = ({ route, navigation }) => {
                     {"\n"}
                     गोत्र : {item.gotra}
                     {"\n"}
-                    मंत्र : {item.chantName}
+                    मंत्र : {item.chantName} ({item.chantSankhya}) ({item.times}{" "}
+                    पट)
                     {"\n"}
                     तारखा : {item.startDate} - {item.endDate}
-                    {"\n"}(
+                    {"\n"}
+                    दिवस :{" "}
                     {datediff(
                       getDateFromDateString(item.startDate),
                       getDateFromDateString(item.endDate)
-                    )}{" "}
-                    दिवस)
+                    )}
                   </Text>
 
                   <Text
@@ -134,7 +135,7 @@ const HomePage = ({ route, navigation }) => {
                     color: "#28B463",
                   }}
                 >
-                  आज कोणताही जप नाही !
+                  आज कोणताही जप उपलब्ध नाही !
                 </Text>
               )}
 

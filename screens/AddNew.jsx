@@ -41,7 +41,6 @@ const HomePage = ({ route, navigation }) => {
 
   React.useEffect(() => {
     if (focus) {
-
       scrollRef?.current?.scrollTo({
         y: 0,
         animated: true,
@@ -120,7 +119,7 @@ const HomePage = ({ route, navigation }) => {
                     fontWeight: "bold",
                   }}
                 >
-                  नवीन ऍड करा
+                  नवीन माहिती जतन करा
                 </Text>
                 <Input
                   placeholder="पूर्ण नाव"
@@ -158,19 +157,29 @@ const HomePage = ({ route, navigation }) => {
                 ))}
 
                 <ButtonGroup
-                  buttons={["1 पट", "2 पट", "3 पट", "4 पट"]}
+                  buttons={[
+                    "1\nपट",
+                    "2\nपट",
+                    "3\nपट",
+                    "4\nपट",
+                    "5\nपट",
+                    "6\nपट",
+                    "7\nपट",
+                    "8\nपट",
+                  ]}
                   selectedIndex={state.times - 1}
                   onPress={(e) => {
                     setState({
                       ...state,
                       times: e + 1,
-                      chantSankhya:
-                        mantras.find(
-                          (mantra) => mantra.name === state.chantName
-                        )?.num ?? 0,
                     });
                   }}
-                  containerStyle={{ height: 50 }}
+                  containerStyle={{
+                    height: 55,
+                    width: "100%",
+                    alignContent: "center",
+                    alignSelf: 'center'
+                  }}
                 />
 
                 <View

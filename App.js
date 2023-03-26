@@ -27,7 +27,7 @@ export default function App() {
               component={HomePage}
               options={{
                 tabBarLabel: "आजचे जप",
-                tabBarIcon: () => <Ionicons name="home" size={20} />,
+                tabBarIcon: () => <Ionicons name="today-sharp" size={20} />,
               }}
             />
 

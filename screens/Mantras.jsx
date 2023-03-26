@@ -99,7 +99,7 @@ const Mantras = ({ route, navigation }) => {
               marginBottom: 25,
             }}
           >
-            नवीन मंत्र ऍड करा
+            नवीन मंत्र जतन करा
           </Text>
 
           <Input
@@ -115,7 +115,7 @@ const Mantras = ({ route, navigation }) => {
             keyboardType="numeric"
             onChangeText={(text) => setModal({ ...modal, num: text })}
           />
-          <Button title="ऍड करा" onPress={addNewMantra} />
+          <Button title="जतन करा" onPress={addNewMantra} />
           <Button
             title="रद्द करा"
             buttonStyle={{ backgroundColor: "#E74C3C", marginTop: 10 }}
@@ -147,7 +147,7 @@ const Mantras = ({ route, navigation }) => {
 
                 <Button
                   size="sm"
-                  titleStyle={{ fontWeight: "bold", fontSize: 22 }}
+                  titleStyle={{ fontWeight: "bold", fontSize: 20 }}
                   buttonStyle={{
                     backgroundColor: "#27AE60",
                     borderRadius: 5,
@@ -156,7 +156,7 @@ const Mantras = ({ route, navigation }) => {
                   }}
                   onPress={() => setModal({ visible: true })}
                 >
-                  नवीन मंत्र ऍड करा
+                  नवीन मंत्र जतन करा
                 </Button>
 
                 <View
@@ -196,16 +196,22 @@ const Mantras = ({ route, navigation }) => {
                             style={{
                               fontWeight: "bold",
                               marginTop: 4,
-                              fontSize: 20,
+                              fontSize: 18,
+                              maxWidth: 160,
+                              flex: 1,
+                              flexWrap: "wrap",
                             }}
                           >
-                            {item.name} ({item.num})
+                            {item.name}
+                            {"\n"}
+                            (संख्या : {item.num})
                           </Text>
                           <Button
                             title="डिलीट करा"
                             buttonStyle={{
                               marginLeft: 10,
                               borderRadius: 5,
+                              marginTop: 7.5,
                               backgroundColor: "#E74C3C",
                             }}
                             onPress={() => deleteMantra(index)}
@@ -223,7 +229,7 @@ const Mantras = ({ route, navigation }) => {
                         marginTop: 20,
                       }}
                     >
-                      कोणतेही मंत्र नाही,{"\n"}कृपया नवीन मंत्र ऍड करा
+                      कोणतेही मंत्र नाही,{"\n"}कृपया नवीन मंत्र संपादित करा
                     </Text>
                   )}
                 </View>

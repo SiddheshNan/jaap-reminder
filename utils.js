@@ -41,7 +41,7 @@ const planets_default = [
 ];
 
 export const KEYS = {
-  CHANTS_LIST: "@chants_list",
+  CHANTS_LIST: "@chants_list2",
   ITEM_LIST: "@item_list", // the items that are added by the user
 };
 
