@@ -17,6 +17,7 @@ import {
   Button,
   CheckBox,
   ButtonGroup,
+  Overlay,
 } from "@rneui/themed";
 import { useIsFocused } from "@react-navigation/native";
 import Constants from "expo-constants";
@@ -45,7 +46,15 @@ const ItemList = ({ route, navigation }) => {
   const focus = useIsFocused();
   const scrollRef = React.useRef(null);
 
+  const [modalVisible, setModalVisible] = React.useState(false);
+
   const [items, setItems] = React.useState([]);
+
+  const onStart = () => {
+    getList().then((data) => {
+      setItems(data.reverse());
+    });
+  };
 
   React.useEffect(() => {
     if (focus) {
@@ -53,10 +62,7 @@ const ItemList = ({ route, navigation }) => {
         y: 0,
         animated: true,
       });
-
-      getList().then((data) => {
-        setItems(data.reverse());
-      });
+      onStart();
     }
   }, [focus]);
 
@@ -119,6 +125,7 @@ const ItemList = ({ route, navigation }) => {
           encoding: "utf8",
         }
       );
+      setModalVisible(false);
 
       return showAlert("सूचना ", "बॅकअप यशस्वी!");
     } catch (error) {
@@ -151,6 +158,9 @@ const ItemList = ({ route, navigation }) => {
       await saveList(fileData.lists);
       await setMantras(fileData.mantras);
 
+      onStart();
+      setModalVisible(false);
+
       return showAlert("सूचना ", "रिस्टोर यशस्वी!");
     } catch (error) {
       showAlert("Error", `${error.name} - ${error.message}`);
@@ -160,7 +170,7 @@ const ItemList = ({ route, navigation }) => {
   return (
     <View style={{ width: "100%", height: "100%" }}>
       <Header
-        elevated={0}
+        elevated={1}
         backgroundColor="#FFB200"
         centerComponent={{
           text: Constants.manifest.name,
@@ -172,12 +182,85 @@ const ItemList = ({ route, navigation }) => {
             marginBottom: 5,
           },
         }}
+        rightComponent={{
+          icon: "backup",
+          color: "#fff",
+          size: 30,
+          style: {
+            marginTop: 7,
+            marginRight: 13,
+          },
+          onPress: () => setModalVisible(true),
+        }}
       />
+
+      <Overlay
+        isVisible={modalVisible}
+        onBackdropPress={() => setModalVisible(false)}
+      >
+        <View
+          style={{ paddingVertical: 25, paddingHorizontal: 25, width: 300 }}
+        >
+          <Text
+            style={{
+              textAlign: "center",
+              fontWeight: "bold",
+              fontSize: 21,
+              marginBottom: 15,
+            }}
+          >
+            कृपया पुढील पर्याय निवडा
+          </Text>
+          <Button
+            size="sm"
+            titleStyle={{ fontWeight: "bold", fontSize: 20 }}
+            buttonStyle={{
+              borderRadius: 5,
+              marginTop: 10,
+            }}
+            onPress={doBackup}
+          >
+            संपूर्ण बॅकअप घ्या
+          </Button>
+
+          <Button
+            size="sm"
+            titleStyle={{ fontWeight: "bold", fontSize: 20 }}
+            buttonStyle={{
+              // backgroundColor: "#E74C3C",
+              borderRadius: 5,
+              marginTop: 12,
+            }}
+            onPress={doRestore}
+          >
+            रिस्टोर करा
+          </Button>
+          <View
+            style={{
+              borderBottomColor: "black",
+              borderBottomWidth: 1,
+              marginBottom: 20,
+              marginTop: 20,
+            }}
+          />
+          <Button
+            size="sm"
+            titleStyle={{ fontWeight: "bold", fontSize: 20 }}
+            buttonStyle={{
+              borderRadius: 5,
+              backgroundColor: "#27AE60",
+            }}
+            onPress={() => setModalVisible(false)}
+          >
+            मागे या (Back)
+          </Button>
+        </View>
+      </Overlay>
 
       <SafeAreaView style={{ flex: 1, paddingTop: -35 }}>
         <KeyboardAvoidingView style={{ flex: 1 }}>
           <ScrollView ref={scrollRef}>
-            <View style={{ flex: 1, height: "100%" }}>
+            <View style={{ flex: 1, height: "100%", marginBottom: 30 }}>
               <Card
                 containerStyle={{
                   paddingVertical: 25,
@@ -273,7 +356,7 @@ const ItemList = ({ route, navigation }) => {
                   </View>
                 ))}
 
-                {items.length === 0 ? (
+                {items.length === 0 && (
                   <Text
                     style={{
                       textAlign: "center",
@@ -283,33 +366,6 @@ const ItemList = ({ route, navigation }) => {
                   >
                     यादी रिकामी आहे,{"\n"} कृपया नवीन माहिती संपादित करा
                   </Text>
-                ) : (
-                  <View>
-                    <Button
-                      size="sm"
-                      titleStyle={{ fontWeight: "bold", fontSize: 20 }}
-                      buttonStyle={{
-                        borderRadius: 5,
-                        marginTop: 10,
-                      }}
-                      onPress={doBackup}
-                    >
-                      बॅकअप घ्या
-                    </Button>
-
-                    <Button
-                      size="sm"
-                      titleStyle={{ fontWeight: "bold", fontSize: 20 }}
-                      buttonStyle={{
-                        // backgroundColor: "#E74C3C",
-                        borderRadius: 5,
-                        marginTop: 10,
-                      }}
-                      onPress={doRestore}
-                    >
-                      रिस्टोर करा
-                    </Button>
-                  </View>
                 )}
               </Card>
             </View>

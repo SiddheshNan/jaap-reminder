@@ -48,7 +48,7 @@ const HomePage = ({ route, navigation }) => {
   return (
     <View style={{ width: "100%", height: "100%" }}>
       <Header
-        elevated={0}
+        elevated={1}
         backgroundColor="#FFB200"
         centerComponent={{
           text: Constants.manifest.name,
@@ -103,6 +103,8 @@ const HomePage = ({ route, navigation }) => {
                     मंत्र : {item.chantName} ({item.chantSankhya}) ({item.times}{" "}
                     पट)
                     {"\n"}
+                    एकूण संख्या : {item.chantSankhya * item.times}
+                    {"\n"}
                     तारखा : {item.startDate} - {item.endDate}
                     {"\n"}
                     दिवस :{" "}
@@ -121,8 +123,8 @@ const HomePage = ({ route, navigation }) => {
                       item.startDate,
                       item.endDate
                     )}
-                    {"\n"}
-                    एकूण जप संख्या : {item.chantSankhya * item.times}
+                    {/* {"\n"}
+                    एकूण जप संख्या : {item.chantSankhya * item.times} */}
                   </Text>
                 </View>
               ))}

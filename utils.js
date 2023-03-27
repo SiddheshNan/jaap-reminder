@@ -41,12 +41,12 @@ const planets_default = [
 ];
 
 export const KEYS = {
-  CHANTS_LIST: "@chants_list2",
+  CHANTS_LIST: "@chants_list",
   ITEM_LIST: "@item_list", // the items that are added by the user
 };
 
 export const showAlert = (title, message) => {
-  Alert.alert(title, message, [{ text: "OK" }], { cancelable: false });
+  Alert.alert(title, message, [{ text: "OK" }]);
 };
 
 export const setMantras = async (js_object) => {
