@@ -203,5 +203,52 @@ export const getInitialState = () => {
 
 export const scollEnabled = false;
 
+export const BIN_URL = "";
+export const ACCESS_TOKEN = "";
 
-export const APP_USER = "MilindMaharaj";
+export const doBackup = async () => {
+  try {
+    const dataToSave = {
+      mantras: await getMantras(),
+      sahitya: await getSahitya(),
+      list: await getList(),
+    };
+
+    const rawResponse = await fetch(BIN_URL, {
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "X-ACCESS-KEY": ACCESS_TOKEN,
+      },
+      body: JSON.stringify(dataToSave),
+    });
+    await rawResponse.json();
+    showAlert("सूचना ", "बॅकअप यशस्वी!");
+  } catch (error) {
+    showAlert("error", error.message);
+  }
+};
+
+export const doRestore = async () => {
+  try {
+    const rawResponse = await fetch(BIN_URL, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "X-ACCESS-KEY": ACCESS_TOKEN,
+      },
+    });
+    const content = await rawResponse.json();
+    const { mantras, sahitya, list } = content.record;
+
+    await setMantras(mantras);
+    await setSahitya(sahitya);
+    await saveList(list);
+
+    showAlert("सूचना ", "रिस्टोर यशस्वी!");
+  } catch (error) {
+    showAlert("error", error.message);
+  }
+};

@@ -35,6 +35,8 @@ import {
   getInitialState,
   setMantras,
   scollEnabled,
+  doBackup,
+  doRestore,
 } from "../utils";
 
 const Stack = createNativeStackNavigator();
@@ -44,6 +46,7 @@ const ItemList = ({ route, navigation }) => {
   const scrollRef = React.useRef(null);
 
   const [items, setItems] = React.useState([]);
+  const [modalVisible, setModalVisible] = React.useState(false);
 
   const onStart = () => {
     getList().then((data) => {
@@ -99,7 +102,85 @@ const ItemList = ({ route, navigation }) => {
             marginBottom: 5,
           },
         }}
+        rightComponent={{
+          icon: "backup",
+          color: "#fff",
+          size: 30,
+          style: {
+            marginTop: 7,
+            marginRight: 13,
+          },
+          onPress: () => setModalVisible(true),
+        }}
       />
+
+      <Overlay
+        isVisible={modalVisible}
+        onBackdropPress={() => setModalVisible(false)}
+      >
+        <View
+          style={{ paddingVertical: 25, paddingHorizontal: 25, width: 300 }}
+        >
+          <Text
+            style={{
+              textAlign: "center",
+              fontWeight: "bold",
+              fontSize: 21,
+              marginBottom: 15,
+            }}
+          >
+            कृपया पुढील पर्याय निवडा
+          </Text>
+          <Button
+            size="sm"
+            titleStyle={{ fontWeight: "bold", fontSize: 20 }}
+            buttonStyle={{
+              borderRadius: 5,
+              marginTop: 10,
+            }}
+            onPress={() => doBackup().then(() => setModalVisible(false))}
+          >
+            संपूर्ण बॅकअप घ्या
+          </Button>
+
+          <Button
+            size="sm"
+            titleStyle={{ fontWeight: "bold", fontSize: 20 }}
+            buttonStyle={{
+              // backgroundColor: "#E74C3C",
+              borderRadius: 5,
+              marginTop: 25,
+            }}
+            onPress={() =>
+              doRestore().then(() => {
+                onStart();
+                setModalVisible(false);
+              })
+            }
+          >
+            रिस्टोर करा
+          </Button>
+          <View
+            style={{
+              borderBottomColor: "black",
+              borderBottomWidth: 1,
+              marginBottom: 25,
+              marginTop: 25,
+            }}
+          />
+          <Button
+            size="sm"
+            titleStyle={{ fontWeight: "bold", fontSize: 20 }}
+            buttonStyle={{
+              borderRadius: 5,
+              backgroundColor: "#27AE60",
+            }}
+            onPress={() => setModalVisible(false)}
+          >
+            मागे या
+          </Button>
+        </View>
+      </Overlay>
 
       <SafeAreaView style={{ flex: 1, paddingTop: -35 }}>
         <KeyboardAvoidingView style={{ flex: 1 }}>
