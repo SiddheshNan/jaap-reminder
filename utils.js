@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
 
-const planets_default = [
+export const planets_default = [
   {
     name: "रवि",
     num: 7000,
@@ -43,6 +43,7 @@ const planets_default = [
 export const KEYS = {
   CHANTS_LIST: "@chants_list",
   ITEM_LIST: "@item_list", // the items that are added by the user
+  SAHITYA_LIST: "@sahitya_list",
 };
 
 export const showAlert = (title, message) => {
@@ -69,6 +70,27 @@ export const getMantras = async () => {
     } else {
       return JSON.parse(value);
     }
+  } catch (e) {
+    showAlert("Error", `${e.name} - ${e.message}}`);
+  }
+};
+
+export const getSahitya = async () => {
+  try {
+    const value = await AsyncStorage.getItem(KEYS.SAHITYA_LIST); // its a json object
+    if (value == null) {
+      return [];
+    } else {
+      return JSON.parse(value);
+    }
+  } catch (e) {
+    showAlert("Error", `${e.name} - ${e.message}}`);
+  }
+};
+
+export const setSahitya = async (js_object) => {
+  try {
+    await AsyncStorage.setItem(KEYS.SAHITYA_LIST, JSON.stringify(js_object));
   } catch (e) {
     showAlert("Error", `${e.name} - ${e.message}}`);
   }
@@ -146,7 +168,7 @@ export const checkBetweenTwoDates = (
     date_parts[0]
   );
 
-  if (date >= from && date < to) {
+  if (date >= from && date <= to) {
     return true;
   }
 
@@ -166,6 +188,20 @@ export const getInitialState = () => {
     endDate: addDateToExistingDateString(getTodayDateString(), 30),
 
     additional_text: "",
-    cost_text: "",
+    cost_arr: [
+      // {
+      //   cost: 500,
+      //   date: "1 May 2023"
+      // },
+      // {
+      //   cost: 100,
+      //   date: "1 December 2023"
+      // }
+    ], // { amt: 0, date: timestap }
   };
 };
+
+export const scollEnabled = false;
+
+
+export const APP_USER = "MilindMaharaj";

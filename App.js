@@ -2,13 +2,14 @@ import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { ThemeProvider } from "@rneui/themed";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Ionicons, Entypo } from "@expo/vector-icons";
+import { Ionicons, Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 
 import HomePage from "./screens/HomePage";
 import AddNew from "./screens/AddNew";
 import Mantras from "./screens/Mantras";
 import HistoryList from "./screens/History";
+import SahityaList from "./screens/SahityaList";
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -41,6 +42,15 @@ export default function App() {
             />
 
             <Tab.Screen
+              name="AddNew"
+              component={AddNew}
+              options={{
+                tabBarLabel: "नवीन",
+                tabBarIcon: () => <Entypo name="add-to-list" size={20} />,
+              }}
+            />
+
+            <Tab.Screen
               name="Mantras"
               component={Mantras}
               options={{
@@ -50,11 +60,13 @@ export default function App() {
             />
 
             <Tab.Screen
-              name="AddNew"
-              component={AddNew}
+              name="SahityaList"
+              component={SahityaList}
               options={{
-                tabBarLabel: "नवीन",
-                tabBarIcon: () => <Entypo name="add-to-list" size={20} />,
+                tabBarLabel: "साहित्य",
+                tabBarIcon: () => (
+                  <MaterialCommunityIcons name="book-outline" size={20} />
+                ),
               }}
             />
           </Tab.Navigator>

@@ -10,7 +10,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Card, Header, Overlay, Input } from "@rneui/themed";
 import { useIsFocused } from "@react-navigation/native";
 import Constants from "expo-constants";
-import { getMantras, setMantras, showAlert } from "../utils";
+import {
+  getMantras,
+  setMantras,
+  showAlert,
+  planets_default,
+  scollEnabled,
+} from "../utils";
 
 const Mantras = ({ route, navigation }) => {
   const focus = useIsFocused();
@@ -26,10 +32,11 @@ const Mantras = ({ route, navigation }) => {
 
   React.useEffect(() => {
     if (focus) {
-      scrollRef?.current?.scrollTo({
-        y: 0,
-        animated: true,
-      });
+      if (scollEnabled)
+        scrollRef?.current?.scrollTo({
+          y: 0,
+          animated: true,
+        });
 
       getMantras().then((data) => {
         setItems(data);
@@ -206,16 +213,21 @@ const Mantras = ({ route, navigation }) => {
                             {"\n"}
                             (संख्या : {item.num})
                           </Text>
-                          <Button
-                            title="डिलीट करा"
-                            buttonStyle={{
-                              marginLeft: 10,
-                              borderRadius: 5,
-                              marginTop: 7.5,
-                              backgroundColor: "#E74C3C",
-                            }}
-                            onPress={() => deleteMantra(index)}
-                          />
+
+                          {planets_default.filter(
+                            (planet) => planet.name === item.name
+                          ).length > 0 ? null : (
+                            <Button
+                              title="डिलीट करा"
+                              buttonStyle={{
+                                marginLeft: 10,
+                                borderRadius: 5,
+                                marginTop: 7.5,
+                                backgroundColor: "#E74C3C",
+                              }}
+                              onPress={() => deleteMantra(index)}
+                            />
+                          )}
                         </View>
                       </View>
                     </View>

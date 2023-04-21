@@ -34,11 +34,8 @@ import {
   showAlert,
   getInitialState,
   setMantras,
+  scollEnabled,
 } from "../utils";
-import * as DocumentPicker from "expo-document-picker";
-
-import * as FileSystem from "expo-file-system";
-import { StorageAccessFramework } from "expo-file-system";
 
 const Stack = createNativeStackNavigator();
 
@@ -46,22 +43,21 @@ const ItemList = ({ route, navigation }) => {
   const focus = useIsFocused();
   const scrollRef = React.useRef(null);
 
-  const [modalVisible, setModalVisible] = React.useState(false);
-
   const [items, setItems] = React.useState([]);
 
   const onStart = () => {
     getList().then((data) => {
-      setItems(data.reverse());
+      setItems(data);
     });
   };
 
   React.useEffect(() => {
     if (focus) {
-      scrollRef?.current?.scrollTo({
-        y: 0,
-        animated: true,
-      });
+      if (scollEnabled)
+        scrollRef?.current?.scrollTo({
+          y: 0,
+          animated: true,
+        });
       onStart();
     }
   }, [focus]);
@@ -87,85 +83,6 @@ const ItemList = ({ route, navigation }) => {
       },
     ]);
   };
-  const fileName = "jaap-reminder.json";
-
-  const doBackup = async () => {
-    try {
-      const permissions =
-        await StorageAccessFramework.requestDirectoryPermissionsAsync();
-      if (!permissions.granted) {
-        return showAlert("सूचना ", "कृपया परवानगी द्या");
-      }
-
-      const filesInFolder = await StorageAccessFramework.readDirectoryAsync(
-        permissions.directoryUri
-      );
-
-      if (!filesInFolder.length) {
-        //create file
-        await StorageAccessFramework.createFileAsync(
-          permissions.directoryUri,
-          fileName,
-          "application/json"
-        );
-      }
-
-      const filesInRoot = await StorageAccessFramework.readDirectoryAsync(
-        permissions.directoryUri
-      );
-
-      const fileData = {};
-      fileData["mantras"] = await getMantras();
-      fileData["lists"] = await getList();
-
-      await FileSystem.writeAsStringAsync(
-        filesInRoot[0],
-        JSON.stringify(fileData),
-        {
-          encoding: "utf8",
-        }
-      );
-      setModalVisible(false);
-
-      return showAlert("सूचना ", "बॅकअप यशस्वी!");
-    } catch (error) {
-      showAlert("Error", `${error.name} - ${error.message}`);
-    }
-  };
-
-  const doRestore = async () => {
-    try {
-      const permission =
-        await StorageAccessFramework.requestDirectoryPermissionsAsync();
-      if (!permission.granted) {
-        return showAlert("सूचना ", "कृपया परवानगी द्या");
-      }
-
-      const filesInRoot = await StorageAccessFramework.readDirectoryAsync(
-        permission.directoryUri
-      );
-
-      if (!filesInRoot.length) {
-        return showAlert("Error", "No file found");
-      }
-
-      const fileContents = await StorageAccessFramework.readAsStringAsync(
-        filesInRoot[0]
-      );
-
-      const fileData = JSON.parse(fileContents);
-
-      await saveList(fileData.lists);
-      await setMantras(fileData.mantras);
-
-      onStart();
-      setModalVisible(false);
-
-      return showAlert("सूचना ", "रिस्टोर यशस्वी!");
-    } catch (error) {
-      showAlert("Error", `${error.name} - ${error.message}`);
-    }
-  };
 
   return (
     <View style={{ width: "100%", height: "100%" }}>
@@ -182,80 +99,7 @@ const ItemList = ({ route, navigation }) => {
             marginBottom: 5,
           },
         }}
-        rightComponent={{
-          icon: "backup",
-          color: "#fff",
-          size: 30,
-          style: {
-            marginTop: 7,
-            marginRight: 13,
-          },
-          onPress: () => setModalVisible(true),
-        }}
       />
-
-      <Overlay
-        isVisible={modalVisible}
-        onBackdropPress={() => setModalVisible(false)}
-      >
-        <View
-          style={{ paddingVertical: 25, paddingHorizontal: 25, width: 300 }}
-        >
-          <Text
-            style={{
-              textAlign: "center",
-              fontWeight: "bold",
-              fontSize: 21,
-              marginBottom: 15,
-            }}
-          >
-            कृपया पुढील पर्याय निवडा
-          </Text>
-          <Button
-            size="sm"
-            titleStyle={{ fontWeight: "bold", fontSize: 20 }}
-            buttonStyle={{
-              borderRadius: 5,
-              marginTop: 10,
-            }}
-            onPress={doBackup}
-          >
-            संपूर्ण बॅकअप घ्या
-          </Button>
-
-          <Button
-            size="sm"
-            titleStyle={{ fontWeight: "bold", fontSize: 20 }}
-            buttonStyle={{
-              // backgroundColor: "#E74C3C",
-              borderRadius: 5,
-              marginTop: 12,
-            }}
-            onPress={doRestore}
-          >
-            रिस्टोर करा
-          </Button>
-          <View
-            style={{
-              borderBottomColor: "black",
-              borderBottomWidth: 1,
-              marginBottom: 20,
-              marginTop: 20,
-            }}
-          />
-          <Button
-            size="sm"
-            titleStyle={{ fontWeight: "bold", fontSize: 20 }}
-            buttonStyle={{
-              borderRadius: 5,
-              backgroundColor: "#27AE60",
-            }}
-            onPress={() => setModalVisible(false)}
-          >
-            मागे या (Back)
-          </Button>
-        </View>
-      </Overlay>
 
       <SafeAreaView style={{ flex: 1, paddingTop: -35 }}>
         <KeyboardAvoidingView style={{ flex: 1 }}>
@@ -301,7 +145,7 @@ const ItemList = ({ route, navigation }) => {
                       {"\n"}
                       एकूण संख्या : {item.chantSankhya * item.times}
                       {"\n"}
-                      तारखा : {item.startDate} - {item.endDate}
+                      तारीख : {item.startDate} - {item.endDate}
                       {"\n"}
                       दिवस :{" "}
                       {datediff(
@@ -321,7 +165,7 @@ const ItemList = ({ route, navigation }) => {
                           अतिरिक्त माहिती : {item.additional_text}
                         </>
                       )}
-                      {item.cost_text && (
+                      {item?.cost_text && (
                         <>
                           {"\n"}
                           हिशोब : {item.cost_text}
@@ -382,6 +226,12 @@ const EditScreen = ({ route, navigation }) => {
   const [state, setState] = React.useState(getInitialState());
   const [mantras, setMantras] = React.useState([]);
 
+  const [costOverlay, setCostOverlay] = React.useState({
+    visible: false,
+    cost: "",
+    date: "",
+  });
+
   React.useEffect(() => {
     if (focus) {
       scrollRef?.current?.scrollTo({
@@ -393,8 +243,12 @@ const EditScreen = ({ route, navigation }) => {
         setMantras(mantra);
         const itemIndex = route.params.itemIndex;
         getList().then((data) => {
-          const item = data[itemIndex];
-          setState(item);
+          const myData = data[itemIndex];
+          console.log(myData);
+          setState({
+            ...getInitialState(),
+            ...myData,
+          });
         });
       });
     } else {
@@ -437,6 +291,67 @@ const EditScreen = ({ route, navigation }) => {
           },
         }}
       />
+
+      <Overlay
+        isVisible={costOverlay.visible}
+        onBackdropPress={() =>
+          setCostOverlay({ ...costOverlay, visible: false })
+        }
+      >
+        <View
+          style={{ paddingVertical: 20, paddingHorizontal: 25, width: 300 }}
+        >
+          <Text
+            style={{
+              textAlign: "center",
+              fontSize: 25,
+              fontWeight: "bold",
+              marginBottom: 25,
+            }}
+          >
+            नवीन हिशोब टाका
+          </Text>
+
+          <Input
+            placeholder="येथे रक्कम टाका "
+            style={{ paddingLeft: 10 }}
+            value={costOverlay.cost}
+            keyboardType="numeric"
+            onChangeText={(text) =>
+              setCostOverlay({ ...costOverlay, cost: text })
+            }
+          />
+          <Input
+            placeholder="येथे तारीख टाका "
+            style={{ paddingLeft: 10 }}
+            value={costOverlay.date}
+            keyboardType="default"
+            onChangeText={(text) =>
+              setCostOverlay({ ...costOverlay, date: text })
+            }
+          />
+          <Button
+            title="जतन करा"
+            onPress={() => {
+              setState({
+                ...state,
+                cost_arr: [
+                  ...state.cost_arr,
+                  { cost: costOverlay.cost, date: costOverlay.date },
+                ],
+              });
+              setCostOverlay({ visible: false, cost: "", date: "" });
+            }}
+          />
+          <Button
+            title="रद्द करा"
+            buttonStyle={{ backgroundColor: "#E74C3C", marginTop: 10 }}
+            onPress={() =>
+              setCostOverlay({ visible: false, cost: "", date: "" })
+            }
+          />
+        </View>
+      </Overlay>
 
       <SafeAreaView style={{ flex: 1, paddingTop: -35 }}>
         <KeyboardAvoidingView style={{ flex: 1 }}>
@@ -495,7 +410,7 @@ const EditScreen = ({ route, navigation }) => {
                 ))}
 
                 <ButtonGroup
-                  buttons={["1 पट", "2 पट", "3 पट", "4 पट"]}
+                  buttons={["1\nपट", "2\nपट", "3\nपट", "4\nपट"]}
                   selectedIndex={state.times - 1}
                   onPress={(e) => {
                     setState({
@@ -531,10 +446,10 @@ const EditScreen = ({ route, navigation }) => {
                           setState({
                             ...state,
                             startDate: getStringFromDate(selectedDate),
-                            endDate: addDateToExistingDateString(
-                              getStringFromDate(selectedDate),
-                              30
-                            ),
+                            // endDate: addDateToExistingDateString(
+                            //   getStringFromDate(selectedDate),
+                            //   30
+                            // ),
                           });
                         },
                         mode: "date",
@@ -639,18 +554,76 @@ const EditScreen = ({ route, navigation }) => {
                   }}
                 />
 
-                <Input
-                  placeholder="हिशोब येथे लिहा"
-                  value={state.cost_text}
-                  onChangeText={(e) => setState({ ...state, cost_text: e })}
-                  multiline
-                  numberOfLines={4}
-                  // maxLength={40}
+                <View
                   style={{
-                    paddingVertical: 10,
-                    paddingHorizontal: 20,
+                    borderBottomColor: "black",
+                    borderBottomWidth: StyleSheet.hairlineWidth,
+                    marginBottom: 15,
+                    marginTop: 0,
+                  }}
+                />
+
+                {state.cost_arr.map((item, index) => (
+                  <View
+                    key={`${item.cost}-${item.date}`}
+                    style={{ marginLeft: 5, marginBottom: 5 }}
+                  >
+                    <Text style={{ fontSize: 17, fontWeight: "bold" }}>
+                      Rs. {item.cost} - {item.date}{" "}
+                      <Button
+                        color={"error"}
+                        size="sm"
+                        title="डिलिट"
+                        onPress={() => {
+                          const oldCostArr = state.cost_arr;
+                          oldCostArr.splice(index, 1);
+                          setState({
+                            ...state,
+                            cost_arr: oldCostArr,
+                          });
+                        }}
+                      />
+                    </Text>
+                  </View>
+                ))}
+
+                <Text
+                  style={{
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    fontSize: 20,
+                    lineHeight: 35,
+                    marginTop: 10,
+                  }}
+                >
+                  एकूण हिशोब बेरीज :{" "}
+                  {state.cost_arr
+                    .map((item) => parseInt(item.cost) || 0)
+                    .reduce((a, b) => a + b, 0)}
+                </Text>
+
+                <Button
+                  onPress={() =>
+                    setCostOverlay({
+                      ...costOverlay,
+                      visible: true,
+                    })
+                  }
+                  color={"warning"}
+                  title="नवीन हिशोब टाका"
+                  buttonStyle={{
+                    marginTop: 10,
+                    marginLeft: 10,
                     borderRadius: 5,
-                    borderWidth: 1,
+                  }}
+                />
+
+                <View
+                  style={{
+                    borderBottomColor: "black",
+                    borderBottomWidth: StyleSheet.hairlineWidth,
+                    marginBottom: 0,
+                    marginTop: 10,
                   }}
                 />
 

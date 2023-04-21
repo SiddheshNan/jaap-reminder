@@ -18,6 +18,7 @@ import {
   Button,
   CheckBox,
   ButtonGroup,
+  Overlay,
 } from "@rneui/themed";
 import {
   getMantras,
@@ -38,6 +39,12 @@ const HomePage = ({ route, navigation }) => {
   const scrollRef = React.useRef(null);
   const [state, setState] = React.useState(getInitialState());
   const [mantras, setMantras] = React.useState([]);
+
+  const [costOverlay, setCostOverlay] = React.useState({
+    visible: false,
+    cost: "",
+    date: "",
+  });
 
   React.useEffect(() => {
     if (focus) {
@@ -100,6 +107,67 @@ const HomePage = ({ route, navigation }) => {
         }}
       />
 
+      <Overlay
+        isVisible={costOverlay.visible}
+        onBackdropPress={() =>
+          setCostOverlay({ ...costOverlay, visible: false })
+        }
+      >
+        <View
+          style={{ paddingVertical: 20, paddingHorizontal: 25, width: 300 }}
+        >
+          <Text
+            style={{
+              textAlign: "center",
+              fontSize: 25,
+              fontWeight: "bold",
+              marginBottom: 25,
+            }}
+          >
+            नवीन हिशोब टाका
+          </Text>
+
+          <Input
+            placeholder="येथे रक्कम टाका "
+            style={{ paddingLeft: 10 }}
+            value={costOverlay.cost}
+            keyboardType="numeric"
+            onChangeText={(text) =>
+              setCostOverlay({ ...costOverlay, cost: text })
+            }
+          />
+          <Input
+            placeholder="येथे तारीख टाका "
+            style={{ paddingLeft: 10 }}
+            value={costOverlay.date}
+            keyboardType="default"
+            onChangeText={(text) =>
+              setCostOverlay({ ...costOverlay, date: text })
+            }
+          />
+          <Button
+            title="जतन करा"
+            onPress={() => {
+              setState({
+                ...state,
+                cost_arr: [
+                  ...state.cost_arr,
+                  { cost: costOverlay.cost, date: costOverlay.date },
+                ],
+              });
+              setCostOverlay({ visible: false, cost: "", date: "" });
+            }}
+          />
+          <Button
+            title="रद्द करा"
+            buttonStyle={{ backgroundColor: "#E74C3C", marginTop: 10 }}
+            onPress={() =>
+              setCostOverlay({ visible: false, cost: "", date: "" })
+            }
+          />
+        </View>
+      </Overlay>
+
       <SafeAreaView style={{ flex: 1, paddingTop: -35 }}>
         <KeyboardAvoidingView style={{ flex: 1 }}>
           <ScrollView ref={scrollRef}>
@@ -157,16 +225,7 @@ const HomePage = ({ route, navigation }) => {
                 ))}
 
                 <ButtonGroup
-                  buttons={[
-                    "1\nपट",
-                    "2\nपट",
-                    "3\nपट",
-                    "4\nपट",
-                    "5\nपट",
-                    "6\nपट",
-                    "7\nपट",
-                    "8\nपट",
-                  ]}
+                  buttons={["1\nपट", "2\nपट", "3\nपट", "4\nपट"]}
                   selectedIndex={state.times - 1}
                   onPress={(e) => {
                     setState({
@@ -178,7 +237,7 @@ const HomePage = ({ route, navigation }) => {
                     height: 55,
                     width: "100%",
                     alignContent: "center",
-                    alignSelf: 'center'
+                    alignSelf: "center",
                   }}
                 />
 
@@ -207,10 +266,10 @@ const HomePage = ({ route, navigation }) => {
                           setState({
                             ...state,
                             startDate: getStringFromDate(selectedDate),
-                            endDate: addDateToExistingDateString(
-                              getStringFromDate(selectedDate),
-                              30
-                            ),
+                            // endDate: addDateToExistingDateString(
+                            //   getStringFromDate(selectedDate),
+                            //   30
+                            // ),
                           });
                         },
                         mode: "date",
@@ -315,18 +374,76 @@ const HomePage = ({ route, navigation }) => {
                   }}
                 />
 
-                <Input
-                  placeholder="हिशोब येथे लिहा"
-                  value={state.cost_text}
-                  onChangeText={(e) => setState({ ...state, cost_text: e })}
-                  multiline
-                  numberOfLines={4}
-                  // maxLength={40}
+                <View
                   style={{
-                    paddingVertical: 10,
-                    paddingHorizontal: 20,
+                    borderBottomColor: "black",
+                    borderBottomWidth: StyleSheet.hairlineWidth,
+                    marginBottom: 15,
+                    marginTop: 0,
+                  }}
+                />
+
+                {state.cost_arr.map((item, index) => (
+                  <View
+                    key={`${item.cost}-${item.date}`}
+                    style={{ marginLeft: 5, marginBottom: 5 }}
+                  >
+                    <Text style={{ fontSize: 17, fontWeight: "bold" }}>
+                      Rs. {item.cost} - {item.date}{" "}
+                      <Button
+                        color={"error"}
+                        size="sm"
+                        title="डिलिट"
+                        onPress={() => {
+                          const oldCostArr = state.cost_arr;
+                          oldCostArr.splice(index, 1);
+                          setState({
+                            ...state,
+                            cost_arr: oldCostArr,
+                          });
+                        }}
+                      />
+                    </Text>
+                  </View>
+                ))}
+
+                <Text
+                  style={{
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    fontSize: 20,
+                    lineHeight: 35,
+                    marginTop: 10,
+                  }}
+                >
+                  एकूण हिशोब बेरीज :{" "}
+                  {state.cost_arr
+                    .map((item) => parseInt(item.cost) || 0)
+                    .reduce((a, b) => a + b, 0)}
+                </Text>
+
+                <Button
+                  onPress={() =>
+                    setCostOverlay({
+                      ...costOverlay,
+                      visible: true,
+                    })
+                  }
+                  color={"warning"}
+                  title="नवीन हिशोब टाका"
+                  buttonStyle={{
+                    marginTop: 10,
+                    marginLeft: 10,
                     borderRadius: 5,
-                    borderWidth: 1,
+                  }}
+                />
+
+                <View
+                  style={{
+                    borderBottomColor: "black",
+                    borderBottomWidth: StyleSheet.hairlineWidth,
+                    marginBottom: 0,
+                    marginTop: 10,
                   }}
                 />
 

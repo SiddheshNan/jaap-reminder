@@ -11,6 +11,7 @@ import {
   getDateFromDateString,
   getTodayDateString,
   checkBetweenTwoDates,
+  scollEnabled,
 } from "../utils";
 
 // show only current jap (in running)
@@ -22,10 +23,11 @@ const HomePage = ({ route, navigation }) => {
 
   React.useEffect(() => {
     if (focus) {
-      scrollRef?.current?.scrollTo({
-        y: 0,
-        animated: true,
-      });
+      if (scollEnabled)
+        scrollRef?.current?.scrollTo({
+          y: 0,
+          animated: true,
+        });
 
       getList().then((allItems) => {
         const loc_items = [];
@@ -101,11 +103,10 @@ const HomePage = ({ route, navigation }) => {
                     गोत्र : {item.gotra}
                     {"\n"}
                     मंत्र : {item.chantName} ({item.chantSankhya}) ({item.times}{" "}
-                    पट)
-                    {"\n"}
+                    पट) {"\n"}
                     एकूण संख्या : {item.chantSankhya * item.times}
                     {"\n"}
-                    तारखा : {item.startDate} - {item.endDate}
+                    तारीख : {item.startDate} - {item.endDate}
                     {"\n"}
                     दिवस :{" "}
                     {datediff(
@@ -123,9 +124,20 @@ const HomePage = ({ route, navigation }) => {
                       item.startDate,
                       item.endDate
                     )}
-                    {/* {"\n"}
-                    एकूण जप संख्या : {item.chantSankhya * item.times} */}
                   </Text>
+
+                  {item.endDate === getTodayDateString() && (
+                    <Text
+                      style={{
+                        fontSize: 20,
+                        marginTop: 8,
+                        fontWeight: "bold",
+                        color: "#E74C3C",
+                      }}
+                    >
+                      आज हा जप संपूर्ण होत आहे !
+                    </Text>
+                  )}
                 </View>
               ))}
 
@@ -140,27 +152,6 @@ const HomePage = ({ route, navigation }) => {
                   आज कोणताही जप उपलब्ध नाही !
                 </Text>
               )}
-
-              {/* <Button
-                  title={"User Login"}
-                  size="lg"
-                  titleStyle={styles.btnText}
-                  buttonStyle={styles.buttons}
-                  containerStyle={styles.btnContainer}
-                  onPress={() => {
-                    navigation.navigate("UserLogin");
-                  }}
-                /> */}
-              {/* <Button
-                  title={"User Signup"}
-                  size="lg"
-                  titleStyle={styles.btnText}
-                  buttonStyle={styles.buttons}
-                  containerStyle={styles.btnContainer}
-                  onPress={() => {
-                    navigation.navigate("UserRegister");
-                  }}
-                /> */}
             </Card>
           </View>
         </ScrollView>
