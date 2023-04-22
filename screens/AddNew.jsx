@@ -26,6 +26,7 @@ import {
   getDateFromDateString,
   getStringFromDate,
   addDateToExistingDateString,
+  getFormatedStringFromDays,
   datediff,
   getList,
   saveList,
@@ -333,9 +334,11 @@ const HomePage = ({ route, navigation }) => {
                   संपूर्ण जप : {state.chantSankhya * state.times}
                   {"\n"}
                   लागणारे दिवस :{" "}
-                  {datediff(
-                    getDateFromDateString(state.startDate),
-                    getDateFromDateString(state.endDate)
+                  {getFormatedStringFromDays(
+                    datediff(
+                      getDateFromDateString(state.startDate),
+                      getDateFromDateString(state.endDate)
+                    )
                   )}
                   {"\n"}
                   रोजची जप संख्या :{" "}

@@ -37,6 +37,7 @@ import {
   scollEnabled,
   doBackup,
   doRestore,
+  getFormatedStringFromDays,
 } from "../utils";
 
 const Stack = createNativeStackNavigator();
@@ -229,9 +230,11 @@ const ItemList = ({ route, navigation }) => {
                       तारीख : {item.startDate} - {item.endDate}
                       {"\n"}
                       दिवस :{" "}
-                      {datediff(
-                        getDateFromDateString(item.startDate),
-                        getDateFromDateString(item.endDate)
+                      {getFormatedStringFromDays(
+                        datediff(
+                          getDateFromDateString(item.startDate),
+                          getDateFromDateString(item.endDate)
+                        )
                       )}
                       {"\n"}
                       एक दिवसाचा जप :{" "}
@@ -246,12 +249,12 @@ const ItemList = ({ route, navigation }) => {
                           अतिरिक्त माहिती : {item.additional_text}
                         </>
                       )}
-                      {item?.cost_text && (
+                      {/* {item?.cost_text && (
                         <>
                           {"\n"}
                           हिशोब : {item.cost_text}
                         </>
-                      )}
+                      )} */}
                     </Text>
                     <Button
                       size="sm"
@@ -325,7 +328,7 @@ const EditScreen = ({ route, navigation }) => {
         const itemIndex = route.params.itemIndex;
         getList().then((data) => {
           const myData = data[itemIndex];
-          console.log(myData);
+          // console.log(myData);
           setState({
             ...getInitialState(),
             ...myData,
@@ -594,10 +597,10 @@ const EditScreen = ({ route, navigation }) => {
                   संपूर्ण जप : {state.chantSankhya * state.times}
                   {"\n"}
                   लागणारे दिवस :{" "}
-                  {datediff(
+                  {getFormatedStringFromDays(datediff(
                     getDateFromDateString(state.startDate),
                     getDateFromDateString(state.endDate)
-                  )}
+                  ))}
                   {"\n"}
                   रोजची जप संख्या :{" "}
                   {Math.ceil(

@@ -252,3 +252,16 @@ export const doRestore = async () => {
     showAlert("error", error.message);
   }
 };
+
+export const getFormatedStringFromDays = (numberOfDays) => {
+  var years = Math.floor(numberOfDays / 365);
+  var months = Math.floor((numberOfDays % 365) / 30);
+  var days = Math.floor((numberOfDays % 365) % 30);
+
+  var yearsDisplay =
+    years > 0 ? years + (years == 1 ? " वर्ष, " : " वर्ष, ") : "";
+  var monthsDisplay =
+    months > 0 ? months + (months == 1 ? " महिना, " : " महिने, ") : "";
+  var daysDisplay = days > 0 ? days + (days == 1 ? " दिवस" : " दिवस") : "";
+  return yearsDisplay + monthsDisplay + daysDisplay;
+};

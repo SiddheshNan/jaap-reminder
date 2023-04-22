@@ -12,6 +12,7 @@ import {
   getTodayDateString,
   checkBetweenTwoDates,
   scollEnabled,
+  getFormatedStringFromDays
 } from "../utils";
 
 // show only current jap (in running)
@@ -109,10 +110,10 @@ const HomePage = ({ route, navigation }) => {
                     तारीख : {item.startDate} - {item.endDate}
                     {"\n"}
                     दिवस :{" "}
-                    {datediff(
+                    {getFormatedStringFromDays(datediff(
                       getDateFromDateString(item.startDate),
                       getDateFromDateString(item.endDate)
-                    )}
+                    ))}
                   </Text>
 
                   <Text
